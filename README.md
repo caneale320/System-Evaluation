@@ -3,4 +3,4 @@ Code from various case studies conducted as a part of SYS 3034 at UVA. Code is m
 
 Baseball case was focused on regression analysis, with some other ML models (unsuccessfully) attempted
 
-Birdstrikes case focused on categorical data anlysis centerd around chi^2 tables
+Birdstrikes case focused on categorical data anlysis centerd around chi^2 tables (data can be found from https://wildlife.faa.gov/home and https://www.transtats.bts.gov/TRAFFIC/)
