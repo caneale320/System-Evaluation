@@ -1,0 +1,52 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# import data
+
+```{r}
+library(RODBC)
+db <- "C:\\Users\\canea\\Documents\\UVA\\Spring 2021\\Systems Evaluation\\Birdstrikes Case\\wildlife.accdb"
+con <- odbcConnectAccess2007(db)
+
+df <- sqlFetch(con, "STRIKE_REPORTS")
+
+```
+
+```{r}
+library(dplyr)
+
+removeNA <- df %>% filter(!is.na(DAMAGE_LEVEL)) 
+removeNA2 <- df %>% filter(!is.na(INDICATED_DAMAGE))
+removeNA2 <- filter(removeNA2, !(AIRCRAFT == "UNKNOWN"))
+
+subsetAircraft <- removeNA2 %>% count(vars= AIRCRAFT) %>% filter(n>250)
+
+over250Strikes <- df %>% filter(df$AIRCRAFT %in% subsetAircraft$vars)
+over250Strikes$INDICATED_DAMAGE <- as.factor(over250Strikes$INDICATED_DAMAGE)
+
+```
+```{r}
+twoWayTable = table(over250Strikes$AIRCRAFT, over250Strikes$INDICATED_DAMAGE)
+library(vcd)
+mosaicplot(twoWayTable, shade = TRUE, las=2,
+           main = "Aircraft", legend= TRUE)
+
+
+
+```
+
+
+```{r}
+library(ggplot2)
+
+options(repr.plot.width = 12, repr.plot.height = 8)
+
+ggplot(over250Strikes) +
+  aes(x = AIRCRAFT, y=1, fill = INDICATED_DAMAGE) +
+  geom_col(position = "fill",) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+ ylab("Proportion of Birdstrikes with ot without Damage")
+
+```
+
