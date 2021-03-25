@@ -24,9 +24,17 @@ https://cran.r-project.org/web/packages/gender/gender.pdf
 library(gender)
 library(tidyr)
 library(dplyr)
+library(tidyverse)
 
 # separate first names
-fac_names %>% separate(full_name, c("first_name", "other_names"), sep=" ", extra="merge") -> fac_names
+fac_names$full_name %>% strsplit(" ") -> fac_names$names
+fac_names$num_names = fac_names$names %>% sapply(length)
+fac_names$first_name = fac_names$names %>% sapply("[", 1)
+
+for (i in 1:nrow(fac_names)){
+  fac_names$last_name[i] <- fac_names$names[i][[1]][fac_names$num_names[i]]
+}
+
 
 # assume oldest professor is 75, youngest is 35
 
@@ -64,6 +72,22 @@ salaries_gender %>% count(gender)
 
 # save as csv
 salaries_gender %>% write.csv("fac_names_gender.csv")
+
+```
+# Join data, filter NAs and clean titles 
+```{r}
+joined = left_join(fac_names_gender, salaries, by = c("first_name" = "First.Name", "last_name" = "Last.Name"))
+
+
+filtered = filter(joined, !is.na(Base.Pay))
+filtered %>% select(c('first_name', "last_name", "title", "school", "department", "gender", "Base.Pay")) -> filtered
+
+
+filtered$cleanedTitle <- str_match(filtered$title, "(Assistant Professor)|(Associate Professor)|(^Professor)|(Lecturer)|(Senior Lecturer)|(Instructor)")
+
+filtered %>% select(-title) -> filtered
+
+write.csv(filtered, "clean_combined_data.csv")
 
 
 ```
